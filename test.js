@@ -1291,12 +1291,15 @@ function runTests(options) {
           watcher.unwatch(getFixturePath('change.txt'));
           watcher.add(getFixturePath('change.txt'));
 
-          fs.writeFileSync(getFixturePath('change.txt'), 'c');
-          waitFor([spy], function() {
-            spy.should.have.been.calledWith('change', getFixturePath('change.txt'));
-            spy.should.have.been.calledOnce;
-            done();
-          });
+          d(function() {
+            fs.writeFileSync(getFixturePath('change.txt'), 'c');
+            var n = new Date()
+            waitFor([spy], function() {
+              spy.should.have.been.calledWith('change', getFixturePath('change.txt'));
+              spy.should.have.been.calledOnce;
+              done();
+            });
+          })();
         }));
     });
   });
