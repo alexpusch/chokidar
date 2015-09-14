@@ -1298,14 +1298,14 @@ function runTests(options) {
           .on('all', spy)
           .on('ready', function(){
             fs.writeFileSync(testPath, 'hello');
-            setTimeout(function(){
+            d(function(){
               fs.unlinkSync(testPath);
               var now = new Date();
               setTimeout(function(){
                 spy.should.not.have.been.calledWith(sinon.match.string, testPath);
                 done();
-              }, 600);
-            }, 500);
+              }, 1100);
+            })();
           });
       });
     });
