@@ -236,10 +236,11 @@ FSWatcher.prototype._awaitWriteFinish = function(path, threshold, callback){
 
       console.log("file exists", path);
 
-      fs.exists(path, function(){
-        console.log("shock!!");
+      fs.exists(path, function(exists){
+        if(!exists)
+          console.log("shock!!");
       })
-      
+
       fs.stat(path, function(err, curStat){
         if(err) return callback(err);
 
