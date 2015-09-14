@@ -1223,7 +1223,7 @@ function runTests(options) {
     describe('waitWriteFinish', function () {
       beforeEach(function() { 
         options.waitWriteFinish = true; 
-        options.writeFinishThreshold = 500;
+        options.writeFinishThreshold = 1000;
       });
       it('should not emit add event before a file is fully written', function (done) {
         var spy = sinon.spy();
@@ -1250,7 +1250,7 @@ function runTests(options) {
               setTimeout(function(){
                 spy.should.have.been.calledWith('add');
                 done();
-              }, 500);
+              }, 1100);
             })();
           }.bind(this));
       });
@@ -1289,7 +1289,7 @@ function runTests(options) {
                   changeSpy.should.have.been.calledWith(testPath);
                   done();
                 });
-              }, 800);
+              }, 1100);
             }, true)();
           }.bind(this))
       });
@@ -1306,7 +1306,7 @@ function runTests(options) {
                 console.log("spy args", spy.args);
                 spy.should.not.have.been.calledWith(sinon.match.string, testPath);
                 done();
-              }, 500);
+              }, 1100);
             }, true)();
           });
       });
