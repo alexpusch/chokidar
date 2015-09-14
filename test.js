@@ -1279,7 +1279,7 @@ function runTests(options) {
           .on('change', changeSpy)
           .on('ready', function(){
             fs.writeFileSync(testPath, 'hello');
-            d(function(){
+            dd(function(){
               spy.should.not.have.been.calledWith('add', testPath);
               setTimeout(function(){
                 fs.writeFileSync(testPath, 'edit');
@@ -1289,8 +1289,8 @@ function runTests(options) {
                   changeSpy.should.have.been.calledWith(testPath);
                   done();
                 });
-              }, 1100);
-            }, true)();
+              }, 1500);
+            })();
           }.bind(this))
       });
       it('should not raise any event for a file that was deleted before fully written', function (done) {
@@ -1300,14 +1300,14 @@ function runTests(options) {
           .on('all', spy)
           .on('ready', function(){
             fs.writeFileSync(testPath, 'hello');
-            d(function(){
+            dd(function(){
               fs.unlinkSync(testPath);
               setTimeout(function(){
                 console.log("spy args", spy.args);
                 spy.should.not.have.been.calledWith(sinon.match.string, testPath);
                 done();
               }, 1100);
-            }, true)();
+            })();
           });
       });
     });
