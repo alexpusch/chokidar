@@ -1284,8 +1284,6 @@ function runTests(options) {
               setTimeout(function(){
                 fs.writeFileSync(testPath, 'edit');
                 waitFor([changeSpy], function(){
-                  console.log("spy args", spy.args);
-                  console.log("change spy", changeSpy.args);
                   changeSpy.should.have.been.calledWith(testPath);
                   done();
                 });
@@ -1293,7 +1291,7 @@ function runTests(options) {
             })();
           }.bind(this))
       });
-      it.only('should not raise any event for a file that was deleted before fully written', function (done) {
+      it('should not raise any event for a file that was deleted before fully written', function (done) {
         var spy = sinon.spy();
         var testPath = getFixturePath('early-unlinked.txt');
         stdWatcher()
@@ -1304,7 +1302,6 @@ function runTests(options) {
               fs.unlinkSync(testPath);
               var now = new Date();
               setTimeout(function(){
-                console.log("spy args", new Date() - now, spy.args);
                 spy.should.not.have.been.calledWith(sinon.match.string, testPath);
                 done();
               }, 600);
