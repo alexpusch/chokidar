@@ -226,44 +226,35 @@ FSWatcher.prototype._awaitWriteFinish = function(path, threshold, callback){
   var timeoutHandler;
 
   var awaitWriteFinish = function(prevStat){
-    fs.exists(path, function(exists){
-      // if the file have been erased, the file entry in _pendingWrites will
-      // be deleted in the unlink event.
-      if(!exists) {
-        console.log("file does not exists", path);
-        return;
+    fs.stat(path, function(err, curStat){
+      if(err){
+        // if the file have been erased, the file entry in _pendingWrites will
+        // be deleted in the unlink event.
+        if(err.code == 'ENOENT') return;
+
+        return callback(err);
+      } 
+        
+      var now = new Date();
+      if(this._pendingWrites[path] === undefined ){
+        this._pendingWrites[path] = {
+          creationTime: now,
+          cancelWait: function(){
+            console.log("canceling wait", path);
+            delete this._pendingWrites[path];
+            clearTimeout(timeoutHandler);
+            return callback();
+          }.bind(this)
+        }
+        return timeoutHandler = setTimeout(awaitWriteFinish.bind(this, curStat), this.options.interval);
       }
 
-      console.log("file exists", path);
-
-      fs.stat(path, function(err, curStat){
-        if(err){
-          if(err.code == 'ENOENT') return;
-          
-          return callback(err);
-        } 
-          
-        var now = new Date();
-        if(this._pendingWrites[path] === undefined ){
-          this._pendingWrites[path] = {
-            creationTime: now,
-            cancelWait: function(){
-              console.log("canceling wait", path);
-              delete this._pendingWrites[path];
-              clearTimeout(timeoutHandler);
-              return callback();
-            }.bind(this)
-          }
-          return timeoutHandler = setTimeout(awaitWriteFinish.bind(this, curStat), this.options.interval);
-        }
-
-        if(curStat.size == prevStat.size && now - this._pendingWrites[path].creationTime > threshold){
-          delete this._pendingWrites[path]
-          callback(null, curStat);
-        } else{
-          return timeoutHandler = setTimeout(awaitWriteFinish.bind(this, curStat), this.options.interval);
-        }
-      }.bind(this));
+      if(curStat.size == prevStat.size && now - this._pendingWrites[path].creationTime > threshold){
+        delete this._pendingWrites[path]
+        callback(null, curStat);
+      } else{
+        return timeoutHandler = setTimeout(awaitWriteFinish.bind(this, curStat), this.options.interval);
+      }
     }.bind(this));
   }.bind(this);
 
