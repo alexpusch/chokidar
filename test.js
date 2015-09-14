@@ -1289,7 +1289,7 @@ function runTests(options) {
                   changeSpy.should.have.been.calledWith(testPath);
                   done();
                 });
-              }, 500);
+              }, 800);
             }, true)();
           }.bind(this))
       });
