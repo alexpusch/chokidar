@@ -150,7 +150,7 @@ FSWatcher.prototype._emit = function(event, path, val1, val2, val3) {
     this._awaitWriteFinish(path, this.options.writeFinishThreshold, function(err, stats){
       if(err){
         event = args[0] = 'error'
-        args.push(err);
+        args[1] = err;
         emitEvent();
       } else if(stats){
         // if stats doesn't exist the file must have been deleted
@@ -223,27 +223,35 @@ FSWatcher.prototype._throttle = function(action, path, timeout) {
 // Polls a newly created file for size variations. When files size does not change for 'threshold'
 // milliseconds calls callback.
 FSWatcher.prototype._awaitWriteFinish = function(path, threshold, callback){
+  var timeoutHandler;
+
   var awaitWriteFinish = function(prevStat){
     fs.exists(path, function(exists){
-      if(!exists){
-        delete this._pendingWrites[path];
-        return callback();
-      }
+      // if the file have been erased, the file entry in _pendingWrites will
+      // be deleted in the unlink event.
+      if(!exists) return;
 
       fs.stat(path, function(err, curStat){
         if(err) return callback(err);
 
         var now = new Date();
         if(this._pendingWrites[path] === undefined ){
-          this._pendingWrites[path] = now;
-          return setTimeout(awaitWriteFinish.bind(this, curStat), this.options.interval);
+          this._pendingWrites[path] = {
+            creationTime: now,
+            cancelWait: function(){
+              delete this._pendingWrites[path];
+              clearTimeout(timeoutHandler);
+              return callback();
+            }.bind(this)
+          }
+          return timeoutHandler = setTimeout(awaitWriteFinish.bind(this, curStat), this.options.interval);
         }
 
-        if(curStat.size == prevStat.size && now - this._pendingWrites[path] > threshold){
+        if(curStat.size == prevStat.size && now - this._pendingWrites[path].creationTime > threshold){
           delete this._pendingWrites[path]
           callback(null, curStat);
         } else{
-          return setTimeout(awaitWriteFinish.bind(this, curStat), this.options.interval);
+          return timeoutHandler = setTimeout(awaitWriteFinish.bind(this, curStat), this.options.interval);
         }
       }.bind(this));
     }.bind(this));
@@ -425,6 +433,12 @@ FSWatcher.prototype._remove = function(directory, item) {
   var parent = this._getWatchedDir(directory);
   var wasTracked = parent.has(item);
   parent.remove(item);
+
+  // If we wait for this file to be fully written, cancel the wait.
+  if(this.waitWriteFinish && this._pendingWrites[path]){
+    this._pendingWrites[path].cancelWait();
+    return;
+  }
 
   // The Entry will either be a directory that just got removed
   // or a bogus entry to a file, in either case we have to remove it
