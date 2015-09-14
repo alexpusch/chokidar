@@ -57,7 +57,7 @@ after(function() {
 
 
 describe('chokidar', function() {
-  this.timeout(3000);
+  this.timeout(10000);
   it('should expose public API methods', function() {
     chokidar.FSWatcher.should.be.a('function');
     chokidar.watch.should.be.a('function');
