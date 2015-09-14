@@ -1293,21 +1293,22 @@ function runTests(options) {
             })();
           }.bind(this))
       });
-      it('should not raise any event for a file that was deleted before fully written', function (done) {
+      it.only('should not raise any event for a file that was deleted before fully written', function (done) {
         var spy = sinon.spy();
         var testPath = getFixturePath('early-unlinked.txt');
         stdWatcher()
           .on('all', spy)
           .on('ready', function(){
             fs.writeFileSync(testPath, 'hello');
-            dd(function(){
+            setTimeout(function(){
               fs.unlinkSync(testPath);
+              var now = new Date();
               setTimeout(function(){
-                console.log("spy args", spy.args);
+                console.log("spy args", new Date() - now, spy.args);
                 spy.should.not.have.been.calledWith(sinon.match.string, testPath);
                 done();
-              }, 1100);
-            })();
+              }, 600);
+            }, 500);
           });
       });
     });
