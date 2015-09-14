@@ -236,14 +236,13 @@ FSWatcher.prototype._awaitWriteFinish = function(path, threshold, callback){
 
       console.log("file exists", path);
 
-      fs.exists(path, function(exists){
-        if(!exists)
-          console.log("shock!!");
-      })
-
       fs.stat(path, function(err, curStat){
-        if(err) return callback(err);
-
+        if(err){
+          if(err.code == 'ENOENT') return;
+          
+          return callback(err);
+        } 
+          
         var now = new Date();
         if(this._pendingWrites[path] === undefined ){
           this._pendingWrites[path] = {
