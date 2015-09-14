@@ -925,7 +925,7 @@ function runTests(options) {
         options.ignored = /add/;
         watcher = chokidar.watch(fixturesPath, options)
           .on('all', spy)
-          .on('ready', d(function() {
+          .on('ready', dd(function() {
             fs.writeFileSync(getFixturePath('add.txt'), 'a');
             fs.writeFileSync(getFixturePath('change.txt'), 'a');
             waitFor([spy.withArgs('change')], function() {
