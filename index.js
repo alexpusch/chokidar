@@ -229,7 +229,12 @@ FSWatcher.prototype._awaitWriteFinish = function(path, threshold, callback){
     fs.exists(path, function(exists){
       // if the file have been erased, the file entry in _pendingWrites will
       // be deleted in the unlink event.
-      if(!exists) return;
+      if(!exists) {
+        console.log("file does not exists", path);
+        return;
+      }
+
+      console.log("file exists", path);
 
       fs.stat(path, function(err, curStat){
         if(err) return callback(err);
@@ -239,6 +244,7 @@ FSWatcher.prototype._awaitWriteFinish = function(path, threshold, callback){
           this._pendingWrites[path] = {
             creationTime: now,
             cancelWait: function(){
+              console.log("canceling wait", path);
               delete this._pendingWrites[path];
               clearTimeout(timeoutHandler);
               return callback();
