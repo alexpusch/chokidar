@@ -925,10 +925,11 @@ function runTests(options) {
         options.ignored = /add/;
         watcher = chokidar.watch(fixturesPath, options)
           .on('all', spy)
-          .on('ready', dd(function() {
+          .on('ready', d(function() {
             fs.writeFileSync(getFixturePath('add.txt'), 'a');
             fs.writeFileSync(getFixturePath('change.txt'), 'a');
             waitFor([spy.withArgs('change')], function() {
+              console.log(spy.args);
               spy.should.not.have.been.calledWith('add', 'add.txt');
               spy.should.not.have.been.calledWith('change', 'add.txt');
               spy.should.have.been.calledWith('add', 'change.txt');
