@@ -1300,14 +1300,14 @@ function runTests(options) {
           .on('all', spy)
           .on('ready', function(){
             fs.writeFileSync(testPath, 'hello');
-            dd(function(){
+            d(function(){
               fs.unlinkSync(testPath);
               setTimeout(function(){
                 console.log("spy args", spy.args);
                 spy.should.not.have.been.calledWith(sinon.match.string, testPath);
                 done();
               }, 500);
-            })();
+            }, true)();
           });
       });
     });
