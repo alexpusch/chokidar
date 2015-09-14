@@ -1272,20 +1272,21 @@ function runTests(options) {
           }.bind(this));
       });
       it('should emit change event after the file have been fully written', function (done) {
-        var spy = sinon.spy();
+        var spy = sinon.spy(), changeSpy = sinon.spy();
         var testPath = getFixturePath('late-change.txt');
         stdWatcher()
           .on('all', spy)
+          .on('change', changeSpy)
           .on('ready', function(){
             fs.writeFileSync(testPath, 'hello');
             d(function(){
               spy.should.not.have.been.calledWith('add', testPath);
               setTimeout(function(){
                 fs.writeFileSync(testPath, 'edit');
-                dd(function(){
-                  spy.should.have.been.calledWith('change', testPath);
+                waitFor([changeSpy], function(){
+                  changeSpy.should.have.been.calledWith(testPath);
                   done();
-                })();
+                });
               }, 500);
             }, true)();
           }.bind(this))
