@@ -1285,7 +1285,7 @@ function runTests(options) {
                 fs.writeFileSync(testPath, 'edit');
                 waitFor([changeSpy], function(){
                   console.log("spy args", spy.args);
-                  console.log("change spy", changeSpy);
+                  console.log("change spy", changeSpy.args);
                   changeSpy.should.have.been.calledWith(testPath);
                   done();
                 });
