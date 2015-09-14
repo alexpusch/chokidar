@@ -1284,6 +1284,8 @@ function runTests(options) {
               setTimeout(function(){
                 fs.writeFileSync(testPath, 'edit');
                 waitFor([changeSpy], function(){
+                  console.log("spy args", spy.args);
+                  console.log("change spy", changeSpy);
                   changeSpy.should.have.been.calledWith(testPath);
                   done();
                 });
@@ -1301,6 +1303,7 @@ function runTests(options) {
             dd(function(){
               fs.unlinkSync(testPath);
               setTimeout(function(){
+                console.log("spy args", spy.args);
                 spy.should.not.have.been.calledWith(sinon.match.string, testPath);
                 done();
               }, 500);
